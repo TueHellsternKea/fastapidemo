@@ -1,41 +1,24 @@
-from typing import Optional
+import logging
+import azure.functions as func
+import nest_asyncio
+from FastAPIApp import app  # Main API application
 
-from fastapi import FastAPI
-from pydantic import BaseModel
-
-app = FastAPI()
-
-fakedb = []
-
-class Course(BaseModel):
-    id:int
-    name:str
-    price:float
-    is_early_bird: Optional[bool] = None
- 
-
-@app.get("/")
-def get_home():
-    return {"message": "helloworld"}
+nest_asyncio.apply()
 
 
-@app.get("/courses")
-def get_courses():
-    return fakedb
+@app.get("/sample")
+async def index():
+    return {
+        "info": "Try /hello/Shivani for parameterized route.",
+    }
 
 
-@app.get("/courses/{course_id}")
-def get_course(course_id:int):
-    course = course_id - 1
-    return fakedb[course]
+@app.get("/hello/{name}")
+async def get_name(name: str):
+    return {
+        "name": name,
+    }
 
-
-@app.post("/courses")
-def add_course(course: Course):
-    fakedb.append(course.dict())
-    return fakedb[-1]
-
-@app.delete("/courses")
-def delete_course(course_id: int):
-    fakedb.pop(course_id - 1)
-    return {"message": "deleted successfully"}    
+async def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
+    """Each request is redirected to the ASGI handler."""
+    return func.AsgiMiddleware(app).handle(req, context)
