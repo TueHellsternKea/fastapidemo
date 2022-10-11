@@ -1,24 +1,17 @@
-import logging
-import azure.functions as func
-import nest_asyncio
-from FastAPIApp import app  # Main API application
+import uvicorn
+from fastapi import FastAPI
+import os
 
-nest_asyncio.apply()
+# load environment variables
+port = os.environ["PORT"]
 
+# initialize FastAPI
+app = FastAPI()
 
-@app.get("/sample")
-async def index():
-    return {
-        "info": "Try /hello/Shivani for parameterized route.",
-    }
-
-
-@app.get("/hello/{name}")
-async def get_name(name: str):
-    return {
-        "name": name,
-    }
-
-async def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
-    """Each request is redirected to the ASGI handler."""
-    return func.AsgiMiddleware(app).handle(req, context)
+@app.get("/")
+def index():
+    return {"data": "Application ran successfully - FastAPI"}
+  
+  
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
